@@ -1,0 +1,8 @@
+Create Database authApp
+use authApp
+Create Table users( id int Auto_Increment Primary Key,
+     fullName Varchar(255) not null,
+     email Varchar(255) not null,
+password Varchar(255) not null,
+created_at TimeStamp DefaulT Current_Timestamp);
+    
