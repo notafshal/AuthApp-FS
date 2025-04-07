@@ -22,6 +22,16 @@ const registerUser = async (req, res) => {
         .send({ status: "failed", message: "Password is missing!!!" });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).send({ message: "Invalid email format" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({
+        status: "failed",
+        message: "Password must be atleast 6 characters long",
+      });
+    }
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -48,5 +58,59 @@ const registerUser = async (req, res) => {
     });
   }
 };
-
-module.exports = { registerUser };
+const getUsers = async (req, res) => {
+  try {
+    const db = req.db;
+    const [rows] = await db.query(`Select * from users`);
+    if (!rows || rows.length === 0) {
+      return res
+        .status(400)
+        .send({ status: "failed", message: "No Record Found" });
+    }
+    res.status(200).send({
+      status: "success",
+      message: "Record of all users",
+      totalUsers: rows.length,
+      data: rows,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      status: "failed",
+      message: "Error getting the data",
+      error: err,
+    });
+  }
+};
+const getSingleUser = async (req, res) => {
+  try {
+    const db = req.db;
+    const userId = req.params.id;
+    if (!userId) {
+      return res.status(400).send({
+        status: "failed",
+        message: "Invalid ID",
+      });
+    }
+    const [userRows] = await db.query(`Select * From users Where id = ?`, [
+      userId,
+    ]);
+    if (!userRows || userRows.length === 0) {
+      return res.status(404).send({ message: "User not found" });
+    }
+    res.status(200).send({
+      message: "User data and booking history retrieved successfully",
+      data: {
+        user: userRows[0],
+      },
+    });
+  } catch (err) {
+    console.log("Error fetching user", err.message || err);
+    res.status(500).send({
+      status: "failed",
+      message: "Error fetching userData",
+      error: err?.message,
+    });
+  }
+};
+module.exports = { registerUser, getUsers, getSingleUser };

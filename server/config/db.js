@@ -21,6 +21,7 @@ const initalizedDB = async () => {
       password: DB_PASS,
       database: DB_NAME,
     });
+
     await dbPool.query(`Create Table if not Exists users( 
         id int Auto_Increment Primary Key,
         fullName Varchar(255) not null,
@@ -28,9 +29,10 @@ const initalizedDB = async () => {
         password Varchar(255) not null,
         created_at TimeStamp DefaulT Current_Timestamp)`);
     console.log("Table users created");
+
     await dbPool.query(`Create Table if not Exists tasks(
         id int Auto_Increment Primary Key,
-        user_id int not null,
+        user_id int not null,  
         title Varchar(255) not null,
         description text,
         created_at TimeStamp Default Current_Timestamp,
